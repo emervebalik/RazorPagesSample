@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RazorPagesSample.Data;
 
 namespace RazorPagesSample
 {
@@ -14,7 +16,16 @@ namespace RazorPagesSample
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            var host=CreateWebHostBuilder(args).Build();
+
+            using (var scope= host.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Add(new Customer { Name = "Michael" });
+                db.Add(new Customer { Name = "Joey" });
+                db.SaveChanges();
+            }
+            host.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
